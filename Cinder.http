@@ -1,0 +1,6 @@
+@Cinder_HostAddress = http://localhost:5111
+
+GET {{Cinder_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
