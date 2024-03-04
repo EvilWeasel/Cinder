@@ -18,7 +18,7 @@ namespace Cinder.Controllers
         {
             _logger = logger;
         }
-
+        // localhost:1111/weatherforecast/
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
