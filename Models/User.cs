@@ -5,7 +5,7 @@ namespace Cinder.Models
   public class User
   {
     // Static -> Existiert in der Klasse, nicht der Instanz!
-    private static int _id;
+    private static int _id = 0;
     public int Id { get; set; }
     public string Username { get; set; }
     public string Password { get; set; }
