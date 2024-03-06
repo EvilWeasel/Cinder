@@ -76,6 +76,7 @@ namespace Cinder.Controllers
     }
 
     // DELETE remove one user
+    // Route: localhost/user/5
     [HttpDelete]
     [Route("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -90,7 +91,6 @@ namespace Cinder.Controllers
       }
       catch
       {
-
         return NotFound();
       }
     }

@@ -21,7 +21,6 @@
         new User("kevin", "def456"),
         new User("alex", "xyz421")
       };
-
     }
   }
 }
