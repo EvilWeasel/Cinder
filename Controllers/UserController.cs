@@ -1,6 +1,7 @@
 ﻿using Cinder.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cinder.Controllers
 {
@@ -9,23 +10,24 @@ namespace Cinder.Controllers
   [ApiController]
   public class UserController : ControllerBase
   {
-    private List<User> users;
-    public UserController()
+    private readonly UserContext _context;
+    public UserController(UserContext context)
     {
-      users = UserRepository.Instance.AllUsers;
+      _context = context;
     }
     // GET all users
     // Route: localhost/user
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<List<User>> Get()
+    public async Task<ActionResult<List<User>>> Get()
     {
-      if (users.Count == 0)
+      var usersList = await _context.Users.ToListAsync();
+      if (usersList.Count() == 0)
       {
         return NotFound();
       }
-      return Ok(users);
+      return Ok(usersList);
     }
 
     // GET user by id
@@ -36,7 +38,7 @@ namespace Cinder.Controllers
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<User> Get(int id)
     {
-      var user = users.Find(user => user.Id == id);
+      var user = _context.Users.Find(id);
       return user == null ? NotFound() : Ok(user);
     }
 
@@ -46,7 +48,8 @@ namespace Cinder.Controllers
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<User> Post([FromBody] User user)
     {
-      users.Add(user);
+      _context.Users.Add(user);
+      _context.SaveChanges();
       return Ok(user);
     }
 
@@ -60,15 +63,17 @@ namespace Cinder.Controllers
       try
       {
         // Get user by id
-        var userToModify = users.Find(users => users.Id == id);
+        var userToModify = _context.Users.Find(id);
         // Modify user with user from http-request body
         userToModify.Username = user.Username;
         userToModify.Password = user.Password;
         userToModify.IsVegan = user.IsVegan;
         userToModify.Occupation = user.Occupation;
+        // save changes to database
+        _context.SaveChanges();
         // return modified user
         return Ok(userToModify);
-      } 
+      }
       catch
       {
         return NotFound();
@@ -81,18 +86,17 @@ namespace Cinder.Controllers
     [Route("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<User> Delete(int id)
+    public async Task<ActionResult<User>> Delete(int id)
     {
-      try
-      {
-        var user = users.Find(user => user.Id == id);
-        users.Remove(user);
-        return Ok(user);
-      }
-      catch
-      {
-        return NotFound();
-      }
+      // Get user by id
+      var userToDelete = _context.Users.Find(id);
+      // If user not found return 404
+      if (userToDelete == null) return NotFound();
+      // Remove user from ef-context
+      _context.Users.Remove(userToDelete);
+      // Save changes to database
+      await _context.SaveChangesAsync();
+      return Ok(userToDelete);
     }
   }
 }

@@ -17,9 +17,9 @@
     {
       AllUsers = new List<User>()
       {
-        new User("tobi", "abc123"),
-        new User("kevin", "def456"),
-        new User("alex", "xyz421")
+        new User() {Username="tobi", Password="123"},
+        new User() {Username="kevin", Password="123"},
+        new User() {Username="alex", Password="123"},
       };
     }
   }
