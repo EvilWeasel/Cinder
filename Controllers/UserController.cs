@@ -89,9 +89,23 @@ namespace Cinder.Controllers
     public async Task<ActionResult<User>> Delete(int id)
     {
       // Get user by id
-      var userToDelete = _context.Users.Find(id);
+      var userToDelete =
+        _context.Users.Include(u => u.UserRecipes)
+        .ThenInclude(ur => ur.Ingredients)
+        .FirstOrDefault(u => u.Id == id);
       // If user not found return 404
       if (userToDelete == null) return NotFound();
+      // remove all ingredients for all recipes of user
+      foreach (var recipe in userToDelete.UserRecipes)
+      {
+        foreach (var ingredient in recipe.Ingredients)
+        {
+          _context.Ingredients.Remove(ingredient);
+        }
+        _context.Recipes.Remove(recipe);
+      }
+
+
       // Remove user from ef-context
       _context.Users.Remove(userToDelete);
       // Save changes to database
