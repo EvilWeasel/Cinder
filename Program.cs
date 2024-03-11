@@ -1,6 +1,6 @@
+using System.Reflection;
 using Cinder;
 using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("CinderDB");
 // Add services to the container.
 // Add service for entity framework
+// Adding services like this is also called "Dependency Injection"
 builder.Services.AddDbContext<UserContext>(
     options => options.UseMySql(
       connectionString,
@@ -19,7 +20,13 @@ builder.Services.AddDbContext<UserContext>(
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+  // Set the comments path for the Swagger JSON and UI.
+  var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+  var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+  c.IncludeXmlComments(xmlPath);
+});
 
 var app = builder.Build();
 
@@ -35,5 +42,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Services.SaveSwaggerYaml();
 
 app.Run();
